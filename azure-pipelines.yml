@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+
+
+
+jobs:
+- deployment: VMDeploy
+  displayName: web
+  pool:
+    vmImage: 'Ubuntu-latest'
+  environment:
+    name:  MoransENV
+    resourceType: VirtualMachine
+    tags: web
+  strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo my first deployment
+   
+- job: Build
+  displayName: Build Maven Project
+  steps:
+  - task: Maven@3
+    displayName: 'Maven Package'
+    inputs:
+      mavenPomFile: 'pom.xml'
+  - task: CopyFiles@2
+    displayName: 'Copy Files to artifact staging directory'
+    inputs:
+      SourceFolder: '$(System.DefaultWorkingDirectory)'
+      Contents: '**/target/*.?(war|jar)'
+      TargetFolder: $(Build.ArtifactStagingDirectory)
+  - upload: $(Build.ArtifactStagingDirectory)
+    artifact: drop
